@@ -1,0 +1,58 @@
+* Watcher
+High level file system event montioring api using inotify
+
+** Use cases
+
+*** Monitoring a directory for newly created files
+
+#+BEGIN_SRC python
+from watcher import Watcher, DIRECTORY_EVENT
+
+def monitor_directory(dir_path):
+    w = Watcher()
+    w.watch(dir_path, [DIRECTORY_EVENT.CREATED])
+    for event in w:
+        print(event.path)
+#+END_SRC
+
+*** Watching a file for updates
+
+#+BEGIN_SRC python
+import json
+
+from watcher import Watcher, FILE_EVENT
+
+config = {}
+
+def update_config(config_path):
+    global config
+    w = Watcher()
+    w.watch(config_path, [FILE_EVENT.MODIFIED])
+    for event in w:
+        assert event.path == config_path
+        with open(config_path, 'r') as f:
+            config = json.load(f)
+#+END_SRC
+
+** Other Features
+
+*** Watching a file for multiple events
+
+#+BEGIN_SRC python
+w = Watcher()
+w.watch(file_path, [FILE_EVENT.OPENED, FILE_EVENT.CLOSED, FILE_EVENT.DELETED])
+for event in w:
+    ...
+
+#+END_SRC
+
+*** Watching multiple files
+
+#+BEGIN_SRC python
+w = Watcher()
+w.watch(first_file, [FILE_EVENT.ACCESSED])
+w.watch(second_file, [FILE_EVENT.ACCESSED])
+for event in w:
+    ...
+
+#+END_SRC
